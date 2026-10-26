@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<meta name="referrer" content="no-referrer">
+<title>MəxfiDəstək – Uşaq müəssisəsində onlayn məsləhət</title>
+<style>
+:root{--bg:#eef3f1;--sf:#fff;--tx:#14262b;--mu:#5a6e72;--ac:#0f6b6b;--ac2:#e8f3f2;--bd:#cfdcd9;--wr:#b4231f;--ok:#1b7a43;--md:#a86400}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1a1c;--sf:#16262a;--tx:#e6f0ee;--mu:#9bb2b3;--ac:#4fc1b8;--ac2:#1c3438;--bd:#2c4448;--wr:#ff8c86;--ok:#6fd49a;--md:#f0b45a}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.55 Georgia,"Times New Roman",serif;background:var(--bg);color:var(--tx)}
+h1,h2,h3,button,label,input,select,textarea,.tab{font-family:"Trebuchet MS",Verdana,sans-serif}
+header{padding:18px 20px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{margin:0;font-size:1.25rem;color:var(--ac)}
+header small{color:var(--mu);display:block;font-family:Georgia,serif}
+main{max-width:860px;margin:24px auto;padding:0 16px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:22px;margin-bottom:18px}
+h2{margin:0 0 4px;font-size:1.15rem}
+p.hint{color:var(--mu);margin:2px 0 14px;font-size:.92rem}
+label{display:block;font-size:.88rem;font-weight:600;margin:12px 0 4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);font-size:1rem}
+input:focus,select:focus,textarea:focus,button:focus-visible,.tab:focus-visible{outline:3px solid var(--ac);outline-offset:1px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media(max-width:600px){.g2{grid-template-columns:1fr}}
+button{cursor:pointer;border:0;border-radius:6px;padding:10px 18px;font-size:.95rem;font-weight:600;background:var(--ac);color:var(--bg);margin-top:16px}
+button.sec{background:var(--ac2);color:var(--ac);border:1px solid var(--bd)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tab{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);cursor:pointer;font-size:.85rem;color:var(--mu)}
+.tab[aria-selected=true]{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.tab[disabled]{opacity:.45;cursor:not-allowed}
+.msg{padding:10px 12px;border-radius:6px;margin-top:12px;font-size:.92rem;background:var(--ac2);border-left:4px solid var(--ac)}
+.msg.err{border-color:var(--wr);color:var(--wr)}
+.chk{display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:8px 0}
+.chk input{width:auto;margin-top:5px}
+.bar{height:8px;border-radius:4px;background:var(--bd);margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--wr);transition:width .2s}
+.lvl{display:inline-block;padding:3px 10px;border-radius:12px;font:600 .85rem "Trebuchet MS",sans-serif;border:1px solid currentColor}
+.hidden{display:none}
+.stars button{background:none;font-size:1.8rem;color:var(--bd);padding:0 4px;margin:0}
+.stars button.on{color:var(--md)}
+.lock{font-size:.85rem;color:var(--mu);border-top:1px dashed var(--bd);margin-top:20px;padding-top:12px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>MəxfiDəstək</h1><small>Uşaq müəssisəsində onlayn məsləhət – məxfilik alt sistemi</small></div>
+  <div id="who" class="hidden"><span id="whoTxt"></span> <button class="sec" id="logout" style="margin:0 0 0 8px">Çıxış</button></div>
+</header>
+<main>
+
+<!-- GİRİŞ / QEYDİYYAT -->
+<section id="auth">
+  <div class="card">
+    <h2>Şəxsi kabinetə giriş</h2>
+    <p class="hint">Hər rol (valideyn, psixoloq, sosial işçi) ayrı kabinetdən istifadə edir. Bir istifadəçi digərinin məlumatını görə bilmir.</p>
+    <form id="fLogin" autocomplete="off">
+      <div class="g2">
+        <div><label for="lFin">FİN kod</label><input id="lFin" maxlength="7" required></div>
+        <div><label for="lRole">Rol</label><select id="lRole"><option value="valideyn">Valideyn</option><option value="psixoloq">Psixoloq</option><option value="sosial">Sosial işçi</option></select></div>
+        <div><label for="lPass">Parol</label><input id="lPass" type="password" required autocomplete="current-password"></div>
+        <div><label for="lCode">Təhlükəsizlik kodu (8 simvol)</label><input id="lCode" type="password" maxlength="8" required></div>
+      </div>
+      <button>Daxil ol</button>
+      <button type="button" class="sec" id="toReg">Yeni kabinet yarat</button>
+    </form>
+    <div id="lMsg"></div>
+  </div>
+
+  <div class="card hidden" id="regCard">
+    <h2>Kabinet yaradılması</h2>
+    <p class="hint">Parol ən azı 12 simvol: böyük və kiçik hərf, rəqəm və xüsusi simvol. Təhlükəsizlik kodu dəqiq 8 simvol: böyük və kiçik hərf, rəqəm və xüsusi simvol.</p>
+    <form id="fReg" autocomplete="off">
+      <div class="g2">
+        <div><label for="rFin">FİN kod (7 simvol)</label><input id="rFin" maxlength="7" required pattern="[A-Za-z0-9]{7}"></div>
+        <div><label for="rRole">Rol</label><select id="rRole"><option value="valideyn">Valideyn</option><option value="psixoloq">Psixoloq</option><option value="sosial">Sosial işçi</option></select></div>
+        <div><label for="rPass">Güclü parol</label><input id="rPass" type="password" required autocomplete="new-password"><div class="bar"><i id="pBar"></i></div></div>
+        <div><label for="rCode">Təhlükəsizlik kodu (8 simvol)</label><input id="rCode" type="password" maxlength="8" required></div>
+      </div>
+      <button>Kabinet yarat</button>
+      <button type="button" class="sec" id="toLogin">Geri</button>
+    </form>
+    <div id="rMsg"></div>
+  </div>
+</section>
+
+<!-- KABİNET -->
+<section id="cab" class="hidden">
+  <div class="tabs" role="tablist" id="tabs"></div>
+
+  <!-- 1 Qeydiyyat -->
+  <div class="card" data-p="0">
+    <h2>1. Müraciətin qeydiyyatı</h2>
+    <p class="hint">Məlumatlar yalnız sizin kabinetinizdə saxlanılır.</p>
+    <form id="fApp">
+      <div class="g2">
+        <div><label>Ad</label><input name="ad" required></div>
+        <div><label>Soyad</label><input name="soyad" required></div>
+        <div><label>Ata adı</label><input name="ata" required></div>
+        <div><label>Yaş</label><input name="yas" type="number" min="3" max="99" required></div>
+        <div><label>Cins</label><select name="cins"><option>Qadın</option><option>Kişi</option></select></div>
+        <div><label>Təhsil səviyyəsi</label><select name="tehsil"><option>Məktəbəqədər</option><option>İbtidai</option><option>Orta</option><option>Tam orta</option><option>Peşə / orta ixtisas</option><option>Ali</option></select></div>
+        <div><label>Məsləhət kateqoriyası</label><select name="kat"><option>Psixoloji dəstək</option><option>Zorakılıq və istismar</option><option>Ailə münasibətləri</option><option>Təhsil və davranış</option><option>Sosial yardım</option><option>Sağlamlıq</option><option>Digər</option></select></div>
+        <div><label>Məsləhəti kim almaq istəyir</label><select name="kim"><option>Uşaq özü</option><option>Valideyn</option><option>Qəyyum</option><option>Müəllim / tərbiyəçi</option></select></div>
+      </div>
+      <label>Məsləhət forması</label>
+      <select name="forma"><option value="chatbot">Çatbot</option><option value="video">Video zəng</option><option value="sesli">Səsli zəng</option><option value="sosial">Benefisiar sosial işçi ilə</option></select>
+      <button>Yadda saxla və qiymətləndirməyə keç</button>
+    </form>
+  </div>
+
+  <!-- 2 Qiymətləndirmə -->
+  <div class="card hidden" data-p="1">
+    <h2>2. Müraciətin qiymətləndirilməsi</h2>
+    <p class="hint">Problemi yoxlayın, risk və təcililik dərəcəsini müəyyən edin.</p>
+    <label for="prob">Problemin qısa təsviri</label>
+    <textarea id="prob" rows="3"></textarea>
+    <label>Risk əlamətləri</label>
+    <div id="risks"></div>
+    <label for="urg">Təcililik</label>
+    <select id="urg"><option value="0">Plan üzrə (7 gün ərzində)</option><option value="1">Tez (48 saat ərzində)</option><option value="2">Təcili (bu gün)</option></select>
+    <button id="bEval">Dərəcəni müəyyən et</button>
+    <div id="evalOut"></div>
+  </div>
+
+  <!-- 3 Görüş -->
+  <div class="card hidden" data-p="2">
+    <h2>3. Onlayn görüşün təyin edilməsi</h2>
+    <p class="hint">Tövsiyə olunan forma problemin dərəcəsinə görə seçilib. İstəsəniz dəyişə bilərsiniz.</p>
+    <div class="g2">
+      <div><label for="mForma">Görüş forması</label><select id="mForma"><option value="chatbot">Çatbot</option><option value="video">Video zəng</option><option value="sesli">Səsli zəng</option><option value="sosial">Benefisiar sosial işçi ilə</option></select></div>
+      <div><label for="mDate">Tarix və saat</label><input id="mDate" type="datetime-local"></div>
+    </div>
+    <button id="bMeet">Görüşü təyin et</button>
+    <div id="meetOut"></div>
+  </div>
+
+  <!-- 4 Məxfilik -->
+  <div class="card hidden" data-p="3">
+    <h2>4. Məxfilik razılığı</h2>
+    <p class="hint">Görüş keçirildikdən sonra danışıqların zəruri hallarda başqa şəxslərlə paylaşılmasına qərar verin. Seçiminiz istənilən vaxt dəyişdirilə bilər.</p>
+    <label class="chk"><input type="radio" name="share" value="bəli"> Zəruri hallarda paylaşılmasına icazə verirəm (yalnız uşağın təhlükəsizliyi üçün səlahiyyətli şəxslərlə)</label>
+    <label class="chk"><input type="radio" name="share" value="xeyr"> İcazə vermirəm. Danışıqlar məxfi qalır.</label>
+    <button id="bPriv">Seçimi təsdiqlə</button>
+    <div id="privOut"></div>
+  </div>
+
+  <!-- 5 Qiymətləndirmə -->
+  <div class="card hidden" data-p="4">
+    <h2>5. Xidmətin qiymətləndirilməsi</h2>
+    <p class="hint">Aldığınız məsləhəti qiymətləndirin.</p>
+    <div class="stars" id="stars" role="radiogroup" aria-label="Qiymət"></div>
+    <label for="cmt">Rəy (istəyə görə)</label>
+    <textarea id="cmt" rows="3"></textarea>
+    <button id="bRate">Rəyi göndər</button>
+    <div id="rateOut"></div>
+  </div>
+
+  <!-- 6 Nəticə -->
+  <div class="card hidden" data-p="5">
+    <h2>6. Nəticə və sonrakı dəstək</h2>
+    <div id="result"></div>
+    <button class="sec" id="bNew">Yeni müraciət</button>
+    <button class="sec" id="bDel">Müraciəti sil</button>
+  </div>
+
+  <p class="lock">Məlumatlar yalnız bu cihazın brauzerində, parol və kodlar isə duzlanmış SHA-256 ilə saxlanılır. Real istifadə üçün server tərəfində şifrələmə, rol əsaslı icazə və audit jurnalı tələb olunur.</p>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const FORMS={chatbot:"Çatbot",video:"Video zəng",sesli:"Səsli zəng",sosial:"Benefisiar sosial işçi ilə"};
+const ROLES={valideyn:"Valideyn",psixoloq:"Psixoloq",sosial:"Sosial işçi"};
+const RISKS=["Fiziki zorakılıq əlaməti","Özünə zərər fikri","Evdə təhlükəsizlik problemi","Uşaq tək və nəzarətsizdir","Yuxu və iştahın kəskin pozulması","Davamlı qorxu və ya narahatlıq","Məktəbdən yayınma","Həmyaşıdlarla münaqişə"];
+const STEPS=["Qeydiyyat","Qiymətləndirmə","Görüş","Məxfilik","Xidmət rəyi","Nəticə"];
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let me=null,app=null,step=0,stars=0;
+
+async function hash(s,salt){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(salt+":"+s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function salt(){return [...crypto.getRandomValues(new Uint8Array(16))].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const strongPass=p=>p.length>=12&&/[a-z]/.test(p)&&/[A-Z]/.test(p)&&/\d/.test(p)&&/[^A-Za-z0-9]/.test(p);
+const strongCode=c=>c.length===8&&/[a-z]/.test(c)&&/[A-Z]/.test(c)&&/\d/.test(c)&&/[^A-Za-z0-9]/.test(c);
+const say=(id,t,e)=>{const d=$(id);d.innerHTML="";const m=document.createElement("div");m.className="msg"+(e?" err":"");m.textContent=t;d.appendChild(m)};
+
+$("toReg").onclick=()=>{$("regCard").classList.remove("hidden")};
+$("toLogin").onclick=()=>{$("regCard").classList.add("hidden")};
+$("rPass").oninput=e=>{const p=e.target.value;let s=0;if(p.length>=12)s++;if(/[a-z]/.test(p)&&/[A-Z]/.test(p))s++;if(/\d/.test(p))s++;if(/[^A-Za-z0-9]/.test(p))s++;$("pBar").style.width=s*25+"%";$("pBar").style.background=s<3?"var(--wr)":s<4?"var(--md)":"var(--ok)"};
+
+$("fReg").onsubmit=async e=>{
+  e.preventDefault();
+  const fin=$("rFin").value.trim().toUpperCase(),role=$("rRole").value,p=$("rPass").value,c=$("rCode").value;
+  if(!/^[A-Z0-9]{7}$/.test(fin))return say("rMsg","FİN kod 7 simvol (hərf və rəqəm) olmalıdır.",1);
+  if(!strongPass(p))return say("rMsg","Parol zəifdir: ən azı 12 simvol, böyük və kiçik hərf, rəqəm və xüsusi simvol olmalıdır.",1);
+  if(!strongCode(c))return say("rMsg","Təhlükəsizlik kodu 8 simvol olmalı və böyük hərf, kiçik hərf, rəqəm, xüsusi simvol daxil etməlidir.",1);
+  const key="u:"+role+":"+fin;
+  if(store.get(key))return say("rMsg","Bu FİN və rol üçün kabinet artıq mövcuddur.",1);
+  const s=salt();
+  store.set(key,{s,p:await hash(p,s),c:await hash(c,s),fails:0,until:0});
+  $("fReg").reset();$("pBar").style.width="0";
+  say("rMsg","Kabinet yaradıldı. İndi daxil ola bilərsiniz.");
+};
+
+$("fLogin").onsubmit=async e=>{
+  e.preventDefault();
+  const fin=$("lFin").value.trim().toUpperCase(),role=$("lRole").value,key="u:"+role+":"+fin,u=store.get(key);
+  const bad="FİN, rol, parol və ya kod yanlışdır.";
+  if(!u)return say("lMsg",bad,1);
+  if(Date.now()<u.until)return say("lMsg","Çox sayda uğursuz cəhd. "+Math.ceil((u.until-Date.now())/60000)+" dəqiqə sonra yenidən cəhd edin.",1);
+  const ok=(await hash($("lPass").value,u.s))===u.p&&(await hash($("lCode").value,u.s))===u.c;
+  if(!ok){u.fails++;if(u.fails>=5){u.until=Date.now()+15*60000;u.fails=0}store.set(key,u);return say("lMsg",bad,1)}
+  u.fails=0;store.set(key,u);
+  me={fin,role,key};$("fLogin").reset();$("lMsg").innerHTML="";
+  open();
+};
+
+function open(){
+  $("auth").classList.add("hidden");$("cab").classList.remove("hidden");$("who").classList.remove("hidden");
+  $("whoTxt").textContent=ROLES[me.role]+" kabineti ("+me.fin.slice(0,2)+"*****)";
+  app=store.get("a:"+me.key)||null;step=app?(app.step||0):0;
+  fillRisks();render();
+}
+function out(){me=null;app=null;$("cab").classList.add("hidden");$("who").classList.add("hidden");$("auth").classList.remove("hidden")}
+$("logout").onclick=out;
+let idle;["click","keydown"].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(idle);if(me)idle=setTimeout(()=>{out();say("lMsg","Qeyri-aktivlik səbəbindən sessiya bağlandı.",1)},10*60000)}));
+function save(){app.step=Math.max(app.step||0,step);store.set("a:"+me.key,app)}
+
+function render(){
+  const max=app?(app.step||0):0;
+  $("tabs").innerHTML="";
+  STEPS.forEach((n,i)=>{const b=document.createElement("button");b.className="tab";b.type="button";b.style.margin="0";b.textContent=(i+1)+". "+n;b.setAttribute("role","tab");b.setAttribute("aria-selected",i===step);b.disabled=i>max;b.onclick=()=>{step=i;render()};$("tabs").appendChild(b)});
+  document.querySelectorAll("[data-p]").forEach(c=>c.classList.toggle("hidden",+c.dataset.p!==step));
+  if(app){const f=$("fApp");for(const k in app.reg||{})if(f.elements[k])f.elements[k].value=app.reg[k];
+    $("prob").value=app.prob||"";
+    if(app.eval){showEval()}
+    if(app.meet)showMeet();
+    if(app.share)$("privOut").innerHTML="",say("privOut","Seçiminiz: "+(app.share==="bəli"?"paylaşıla bilər":"paylaşılmaz")+".");
+    if(step===5)showResult();
+  }
+}
+function fillRisks(){$("risks").innerHTML="";RISKS.forEach((r,i)=>{const l=document.createElement("label");l.className="chk";const c=document.createElement("input");c.type="checkbox";c.value=i;l.append(c,r);$("risks").appendChild(l)})}
+
+$("fApp").onsubmit=e=>{
+  e.preventDefault();const r={};new FormData(e.target).forEach((v,k)=>r[k]=v);
+  app=Object.assign(app||{},{reg:r,id:"M-"+Date.now().toString(36).toUpperCase()});step=1;save();render();
+};
+
+function calc(){
+  const ch=[...$("risks").querySelectorAll("input:checked")].map(x=>+x.value);
+  const heavy=ch.filter(i=>i<4).length,u=+$("urg").value;
+  const score=heavy*3+(ch.length-heavy)*1+u*2;
+  const lvl=(heavy>0&&u===2)||score>=10?"Yüksək":score>=4?"Orta":"Aşağı";
+  return {ch,u,score,lvl};
+}
+function showEval(){
+  const e=app.eval;const col={"Yüksək":"var(--wr)","Orta":"var(--md)","Aşağı":"var(--ok)"}[e.lvl];
+  $("evalOut").innerHTML="";
+  const d=document.createElement("div");d.className="msg";
+  d.innerHTML='Risk dərəcəsi: <span class="lvl" style="color:'+col+'">'+e.lvl+'</span> Təcililik: <b>'+["Plan üzrə","Tez","Təcili"][e.u]+'</b><br>Tövsiyə olunan forma: <b>'+FORMS[e.rec]+'</b><br><button id="goMeet">Görüşün təyininə keç</button>';
+  $("evalOut").appendChild(d);$("goMeet").onclick=()=>{step=2;render()};
+}
+$("bEval").onclick=()=>{
+  if(!app)return;
+  if(!$("prob").value.trim())return say("evalOut","Əvvəlcə problemi qısa təsvir edin.",1);
+  const c=calc();
+  const rec=c.lvl==="Yüksək"?(app.reg.kat==="Zorakılıq və istismar"?"sosial":"video"):c.lvl==="Orta"?"sesli":"chatbot";
+  app.prob=$("prob").value.trim();app.eval={lvl:c.lvl,u:c.u,ch:c.ch,rec};step=1;save();showEval();
+  $("mForma").value=rec;
+};
+
+function nowLocal(){const d=new Date(Date.now()+3600e3);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+$("mDate").min=nowLocal();
+function showMeet(){say("meetOut","Görüş təyin edildi: "+FORMS[app.meet.f]+", "+new Date(app.meet.d).toLocaleString("az")+". Görüş sonrası məxfilik seçiminə keçin.");const b=document.createElement("button");b.textContent="Görüş keçirildi, davam et";b.onclick=()=>{app.step=Math.max(app.step,3);step=3;save();render()};$("meetOut").appendChild(b)}
+$("bMeet").onclick=()=>{
+  if(!app||!app.eval)return say("meetOut","Əvvəlcə qiymətləndirməni tamamlayın.",1);
+  if(!$("mDate").value)return say("meetOut","Tarix və saatı seçin.",1);
+  app.meet={f:$("mForma").value,d:$("mDate").value};app.step=Math.max(app.step,2);save();showMeet();render2();
+};
+function render2(){const t=$("tabs").children;for(let i=0;i<t.length;i++)t[i].disabled=i>app.step}
+
+$("bPriv").onclick=()=>{
+  const v=document.querySelector("input[name=share]:checked");
+  if(!v)return say("privOut","Birini seçin.",1);
+  app.share=v.value;step=4;save();render();
+};
+
+const sb=$("stars");for(let i=1;i<=5;i++){const b=document.createElement("button");b.type="button";b.textContent="★";b.setAttribute("aria-label",i+" ulduz");b.onclick=()=>{stars=i;[...sb.children].forEach((x,j)=>x.classList.toggle("on",j<i))};sb.appendChild(b)}
+$("bRate").onclick=()=>{
+  if(!stars)return say("rateOut","Ulduz sayını seçin.",1);
+  app.rate={s:stars,c:$("cmt").value.trim()};step=5;save();render();
+};
+
+function showResult(){
+  const e=app.eval,r=$("result");r.innerHTML="";
+  const plan={"Yüksək":"Sosial işçi və psixoloq 24 saat ərzində əlaqə saxlayır, təhlükəsizlik planı hazırlanır, zəruri hallarda səlahiyyətli qurumlara bildiriş verilir.","Orta":"Psixoloq ilə 2 həftə ərzində təkrar görüş təyin edilir, valideynə tövsiyələr verilir.","Aşağı":"Çatbot və məlumat materialları ilə özünə kömək, 1 ay sonra yoxlama sorğusu."}[e.lvl];
+  const lines=["Müraciət nömrəsi: "+app.id,"Kateqoriya: "+app.reg.kat,"Risk dərəcəsi: "+e.lvl,"Görüş: "+FORMS[app.meet.f],"Məxfilik: "+(app.share==="bəli"?"zəruri hallarda paylaşıla bilər":"paylaşılmaz"),"Xidmət qiyməti: "+app.rate.s+" / 5","Növbəti dəstək: "+plan];
+  lines.forEach(t=>{const p=document.createElement("p");p.textContent=t;p.style.margin="6px 0";r.appendChild(p)});
+}
+$("bNew").onclick=()=>{app=null;localStorage.removeItem("a:"+me.key);$("fApp").reset();$("evalOut").innerHTML="";$("meetOut").innerHTML="";$("rateOut").innerHTML="";$("privOut").innerHTML="";$("prob").value="";fillRisks();stars=0;[...sb.children].forEach(x=>x.classList.remove("on"));step=0;render()};
+$("bDel").onclick=()=>{if(confirm("Müraciət və bütün qeydlər silinsin?")){$("bNew").onclick()}};
+</script>
+</body>
+</html>
